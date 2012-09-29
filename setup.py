@@ -39,6 +39,9 @@ setup(
             'tester = pytrains.tester:main',
         ],
         },
+    install_requires = (
+        'fixed',
+        ),
     extras_require=dict(
         test=test_requires,
         )

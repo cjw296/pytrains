@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-from pytrains.cif.parser import parse
+from pytrains.cif import CIF
 
 import sys
 
@@ -10,9 +10,8 @@ def main():
     to_print = set(sys.argv[2:])
     try:
         started = datetime.now()
-        for message in parse(open(sys.argv[1])):
-            types[message.prefix] += 1
-            from .cif.meta import ongoing
+        for message in CIF(open(sys.argv[1])):
+            types[message.__class__] += 1
             if isinstance(message, Exception):
                 pass
                 #raise message
@@ -21,7 +20,7 @@ def main():
                 for name, value in zip(message._fields, message):
                     print '%20s=%r' % (name, value)
                 print
-            if not i % 10000:
+            if not i % 100000:
                 print types
             i += 1
     finally:
