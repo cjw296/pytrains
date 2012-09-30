@@ -37,6 +37,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'tester = pytrains.tester:main',
+            'handler = pytrains.handler:main',
         ],
         },
     install_requires = (
