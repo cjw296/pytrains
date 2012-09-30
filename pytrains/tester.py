@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+from fixed import Handler
 from pytrains.cif import CIF
 
 import sys
@@ -11,7 +12,7 @@ def main():
     try:
         started = datetime.now()
         for message in CIF(open(sys.argv[1])):
-            types[message.__class__] += 1
+            types[message.__class__.__name__] += 1
             if isinstance(message, Exception):
                 pass
                 #raise message
