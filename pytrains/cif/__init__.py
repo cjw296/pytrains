@@ -1,6 +1,10 @@
 from fixed import Parser, Record, Field, Discriminator, Skip, Constant, one_of
 
-from .convertors import ddmmyy, days, hhmm, yymmdd
+from .convertors import ddmmyy, days, hhmm, yymmdd, safe_int
+from .fields import (
+    NewDeleteRevises, STPIndicator, BHX, STATUS, CATEGORY, POWER_TYPE,
+    OPERATING_CHARACTERISTICS, CLASS, CATERING
+    )
 
 class CIF(Parser):
     
@@ -33,16 +37,12 @@ class CIF(Parser):
 
     class Association(Record):
         prefix = Discriminator('AA')
-        type = Field(1, one_of(
-            Constant('N', 'new'),
-            Constant('D', 'delete'),
-            Constant('R', 'revises'),
-            ))
+        type = NewDeleteRevises()
         main_uid = Field(6, str)
         associated_uid = Field(6, str)
         start_date = Field(6, yymmdd)
         end_date = Field(6, yymmdd)
-        dates = Field(7, days)
+        days = Field(7, days)
         category = Field(2, one_of(
             Constant('JJ', 'join'),
             Constant('VV', 'divide'),
@@ -64,11 +64,45 @@ class CIF(Parser):
             operating = Constant('O', 'operating use only'),
             empty = Constant(' ', 'empty (not in spec)')
             ))
-        spare = Field(31)
-        stp = Field(1, one_of(
-            non_overlay = Constant(' ', 'non overlay user'),
-            cancel = Constant('C', 'stp cancellation of permanent association'),
-            new = Constant('N', 'new stp association (not an overlay)'),
-            permanent = Constant('P', 'permanent association'),
-            overlay = Constant('O', 'stp overlay of permanent association'),
+        spare = Skip(31)
+        stp = STPIndicator()
+
+    class BasicSchedule(Record):
+        prefix = Discriminator('BS')
+        type = NewDeleteRevises()
+        train_uid = Field(6)
+        date_from = Field(6, yymmdd)
+        date_to = Field(6, yymmdd)
+        days = Field(7, days)
+        bank_holiday_running = BHX()
+        status = STATUS()
+        category = CATEGORY()
+        identity = Field(4)
+        headcode = Field(4)
+        course_indicator = Skip(1)
+        train_service_code = Field(8)
+        portion_id = Field(1) # AKA BUSSEC
+        power_type = POWER_TYPE()
+        timing_load = Field(4) # Not decoded as requires power_type field
+        speed = Field(3, safe_int)
+        oper_chars = OPERATING_CHARACTERISTICS()
+        train_class = CLASS()
+        sleepers = Field(1, one_of(
+            none = Constant(' ', 'No sleepers'),
+            both = Constant('B', 'First & Standard Class'),
+            first = Constant('F', 'First Class only.'),
+            standard = Constant('S', 'Standard Class only.'),
             ))
+        reservations = Field(1, one_of(
+            compulsory = Constant('A', 'Seat Reservations Compulsory'),
+            bicycle = Constant('E', 'Reservations for Bicycles Essential'),
+            recommended = Constant('R', 'Seat Reservations Recommended'),
+            possible = Constant('S', 'Seat Reservations possible from any station'),
+            empty = Constant(' ', 'empty (not in spec)')
+            ))
+        connection_indicator = Field(1) # not used
+        catering_code = CATERING()
+        service_branding = Skip(4) # appears to be always empty
+        spare = Skip(1)
+        stp = STPIndicator()
+

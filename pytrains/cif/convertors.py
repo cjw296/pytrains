@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import date, time
-from fixed import Constant
+from fixed import Constant, one_of
 
 def ddmmyy(txt):
     day = int(txt[:2])
@@ -32,3 +32,21 @@ Days = namedtuple('Days',
                   'monday tuesday wednesday thursday friday saturday sunday')
 def days(txt):
     return Days(*map(int, txt))
+
+def safe_int(txt):
+    try:
+        return int(txt)
+    except ValueError:
+        return None
+
+class set_of(one_of):
+
+    size_check = False
+    
+    def __call__(self, text):
+        result = set()
+        for char in text:
+            if char==' ':
+                continue
+            result.add(self[char])
+        return result
