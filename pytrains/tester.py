@@ -26,7 +26,7 @@ def main():
             i += 1
     finally:
         duration = datetime.now() - started
-        print "%i records in %s at %.0f/s" % (
+        print "%i records in %s at %.0f records/second" % (
             i, duration,
             float(i)/duration.seconds if duration.seconds else i
             )
