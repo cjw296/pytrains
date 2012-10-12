@@ -38,6 +38,7 @@ setup(
         'console_scripts': [
             'tester = pytrains.tester:main',
             'handler = pytrains.handler:main',
+            'explore = pytrains.explore:main',
         ],
         },
     install_requires = (
